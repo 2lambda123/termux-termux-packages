@@ -3,7 +3,7 @@ TERMUX_PKG_DESCRIPTION="GNU Binutils libraries"
 TERMUX_PKG_LICENSE="GPL-3.0"
 TERMUX_PKG_MAINTAINER="@termux"
 TERMUX_PKG_VERSION="2.43"
-TERMUX_PKG_SRCURL=https://ftp.gnu.org/gnu/binutils/binutils-${TERMUX_PKG_VERSION}.tar.bz2
+TERMUX_PKG_SRCURL=https://ftp.gnu.org/gnu/binutils/binutils-$TERMUX_PKG_VERSION.tar.bz2
 TERMUX_PKG_SHA256=fed3c3077f0df7a4a1aa47b080b8c53277593ccbb4e5e78b73ffb4e3f265e750
 TERMUX_PKG_DEPENDS="zlib, zstd"
 TERMUX_PKG_BREAKS="binutils (<< 2.39), binutils-dev"
@@ -59,16 +59,16 @@ termux_step_pre_configure() {
 	export LDFLAGS="$LDFLAGS -Wl,--undefined-version"
 
 	if [ "$TERMUX_ARCH_BITS" = 32 ]; then
-		export LIB_PATH="${TERMUX_PREFIX}/lib:/system/lib"
+		export LIB_PATH="$TERMUX_PREFIX/lib:/system/lib"
 	else
-		export LIB_PATH="${TERMUX_PREFIX}/lib:/system/lib64"
+		export LIB_PATH="$TERMUX_PREFIX/lib:/system/lib64"
 	fi
 }
 
 termux_step_post_make_install() {
-	local d=$TERMUX_PREFIX/share/binutils
-	mkdir -p "${d}"
-	touch "${d}"/.placeholder
+	local d="$TERMUX_PREFIX"/share/binutils
+	mkdir -p "$d"
+	touch "$d"/.placeholder
 
 	mkdir -p "$TERMUX_PREFIX"/bin
 	cd "$TERMUX_PREFIX"/libexec/binutils || exit
@@ -82,16 +82,16 @@ termux_step_post_make_install() {
 	ln -sfr "$TERMUX_PREFIX"/bin/{ld.,}gold
 
 	for b in *; do
-		ln -sfr "$TERMUX_PREFIX"/libexec/binutils/"${b}" \
-			"$TERMUX_PREFIX"/bin/"${b}"
+		ln -sfr "$TERMUX_PREFIX"/libexec/binutils/"$b" \
+			"$TERMUX_PREFIX"/bin/"$b"
 	done
 
 	# Setup symlinks as these are used when building, so used by
 	# system setup in e.g. python, perl and libtool:
 	local _TOOLS_WITH_HOST_PREFIX="ar ld nm objdump ranlib readelf strip"
-	for b in ${_TOOLS_WITH_HOST_PREFIX}; do
-		ln -sfr "$TERMUX_PREFIX"/libexec/binutils/"${b}" \
-			"$TERMUX_PREFIX"/bin/"$TERMUX_HOST_PLATFORM"-"${b}"
+	for b in "$_TOOLS_WITH_HOST_PREFIX"; do
+		ln -sfr "$TERMUX_PREFIX"/libexec/binutils/"$b" \
+			"$TERMUX_PREFIX"/bin/"$TERMUX_HOST_PLATFORM"-"$b"
 	done
 }
 

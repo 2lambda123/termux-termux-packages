@@ -8,12 +8,12 @@ TERMUX_PKG_VERSION+=(2.100.1) # TOOLS version
 TERMUX_PKG_VERSION+=(1.30.0)  # DUB version
 TERMUX_PKG_REVISION=1
 
-TERMUX_PKG_SRCURL=(https://github.com/ldc-developers/ldc/releases/download/v${TERMUX_PKG_VERSION}/ldc-${TERMUX_PKG_VERSION}-src.tar.gz
-                   https://github.com/ldc-developers/llvm-project/releases/download/ldc-v${TERMUX_PKG_VERSION[1]}/llvm-${TERMUX_PKG_VERSION[1]}.src.tar.xz
-                   https://github.com/llvm/llvm-project/releases/download/llvmorg-${TERMUX_PKG_VERSION[1]}/libunwind-${TERMUX_PKG_VERSION[1]}.src.tar.xz
-                   https://github.com/dlang/tools/archive/v${TERMUX_PKG_VERSION[2]}.tar.gz
-                   https://github.com/dlang/dub/archive/v${TERMUX_PKG_VERSION[3]}.tar.gz
-                   https://github.com/ldc-developers/ldc/releases/download/v${TERMUX_PKG_VERSION}/ldc2-${TERMUX_PKG_VERSION}-linux-x86_64.tar.xz)
+TERMUX_PKG_SRCURL=(https://github.com/ldc-developers/ldc/releases/download/v"$TERMUX_PKG_VERSION/ldc-$TERMUX_PKG_VERSION"-src.tar.gz
+                   https://github.com/ldc-developers/llvm-project/releases/download/ldc-v"${TERMUX_PKG_VERSION[1]}/llvm-${TERMUX_PKG_VERSION[1]}".src.tar.xz
+                   https://github.com/llvm/llvm-project/releases/download/llvmorg-"${TERMUX_PKG_VERSION[1]}/libunwind-${TERMUX_PKG_VERSION[1]}".src.tar.xz
+                   https://github.com/dlang/tools/archive/v"${TERMUX_PKG_VERSION[2]}".tar.gz
+                   https://github.com/dlang/dub/archive/v"${TERMUX_PKG_VERSION[3]}".tar.gz
+                   https://github.com/ldc-developers/ldc/releases/download/v"$TERMUX_PKG_VERSION/ldc2-$TERMUX_PKG_VERSION"-linux-x86_64.tar.xz)
 TERMUX_PKG_SHA256=(fdbb376f08242d917922a6a22a773980217fafa310046fc5d6459490af23dacd
                    9638d8d0b6a43d9cdc53699bec19e6bc9bef98f5950b99e6b8c1ec373aee4fa7
                    301137841d1e3401f59b3828d2a9ac86a1b826b89265d55541a2fd6ca2a595eb
@@ -47,7 +47,7 @@ TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 termux_step_post_get_source() {
 	# Certain packages are not safe to build on device because their
 	# build.sh script deletes specific files in $TERMUX_PREFIX.
-	if $TERMUX_ON_DEVICE_BUILD; then
+	if "$TERMUX_ON_DEVICE_BUILD"; then
 		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
 	fi
 
@@ -111,8 +111,8 @@ termux_step_pre_configure() {
 	else
 		termux_error_exit "Invalid arch: $TERMUX_ARCH"
 	fi
-	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -DLLVM_DEFAULT_TARGET_TRIPLE=${LLVM_TRIPLE}"
-	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -DLLVM_TARGET_ARCH=${LLVM_TARGET_ARCH}"
+	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -DLLVM_DEFAULT_TARGET_TRIPLE=$LLVM_TRIPLE"
+	TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" -DLLVM_TARGET_ARCH=$LLVM_TARGET_ARCH"
 
 	# CPPFLAGS adds the system llvm to the include path, which causes
 	# conflicts with the local patched llvm when compiling ldc
@@ -193,14 +193,14 @@ termux_step_make() {
 	DFLAGS+=" -L-rpath=$TERMUX_PREFIX/lib"
 
 	cd  "$TERMUX_PKG_SRCDIR"/dlang-tools || exit
-	$DMD -w -de -dip1000 rdmd.d -of="$TERMUX_PKG_BUILDDIR"/bin/rdmd
-	$DMD -w -de -dip1000 ddemangle.d -of="$TERMUX_PKG_BUILDDIR"/bin/ddemangle
-	$DMD -w -de -dip1000 DustMite/dustmite.d DustMite/splitter.d DustMite/polyhash.d -of="$TERMUX_PKG_BUILDDIR"/bin/dustmite
+	"$DMD" -w -de -dip1000 rdmd.d -of="$TERMUX_PKG_BUILDDIR"/bin/rdmd
+	"$DMD" -w -de -dip1000 ddemangle.d -of="$TERMUX_PKG_BUILDDIR"/bin/ddemangle
+	"$DMD" -w -de -dip1000 DustMite/dustmite.d DustMite/splitter.d DustMite/polyhash.d -of="$TERMUX_PKG_BUILDDIR"/bin/dustmite
 	echo ".: dlang tools built successfully."
 
 	cd "$TERMUX_PKG_SRCDIR"/dub || exit
 	# Note: cannot link a native build.d tool, so build manually:
-	$DMD -of="$TERMUX_PKG_BUILDDIR"/bin/dub -Isource -version=DubUseCurl -version=DubApplication -O -w -linkonce-templates @build-files.txt
+	"$DMD" -of="$TERMUX_PKG_BUILDDIR"/bin/dub -Isource -version=DubUseCurl -version=DubApplication -O -w -linkonce-templates @build-files.txt
 	echo ".: dub built successfully."
 }
 
