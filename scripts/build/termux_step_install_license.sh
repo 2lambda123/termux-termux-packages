@@ -57,7 +57,7 @@ termux_step_install_license() {
 					if (( ! FROM_SOURCES )); then
 						local FILE
 						local EXTRA_LICENSE_FILES=()
-						if [ "$LICENSE" = 'MIT' ]; then
+						if [[ "$LICENSE" == 'MIT' ]]; then
 							EXTRA_LICENSE_FILES+=('LICENCE-MIT' 'LICENSE-MIT')
 						fi
 						# Find the license file(s) in the source files
