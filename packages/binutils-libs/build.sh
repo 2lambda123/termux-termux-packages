@@ -35,66 +35,66 @@ TERMUX_PKG_EXTRA_HOSTBUILD_CONFIGURE_ARGS="
 "
 
 termux_step_host_build() {
-	"$TERMUX_PKG_SRCDIR"/configure "$TERMUX_PKG_EXTRA_HOSTBUILD_CONFIGURE_ARGS"
-	make -j "$TERMUX_PKG_MAKE_PROCESSES"
-	make install
-	make install-strip
+  "$TERMUX_PKG_SRCDIR"/configure "$TERMUX_PKG_EXTRA_HOSTBUILD_CONFIGURE_ARGS"
+  make -j "$TERMUX_PKG_MAKE_PROCESSES"
+  make install
+  make install-strip
 }
 
 # Avoid linking against libfl.so from flex if available:
 export LEXLIB=
 
 termux_step_pre_configure() {
-	# Remove this marker all the time, as binutils is architecture-specific.
-	rm -rf "$TERMUX_HOSTBUILD_MARKER"
+  # Remove this marker all the time, as binutils is architecture-specific.
+  rm -rf "$TERMUX_HOSTBUILD_MARKER"
 
-	export CPPFLAGS="$CPPFLAGS -Wno-c++11-narrowing"
-	# llvm upgraded a warning to an error, which caused this build (and some
-	# others, including the rust toolchain) to fail like so:
-	#
-	# ld.lld: error: version script assignment of 'LIBCTF_1.0' to symbol 'ctf_label_set' failed: symbol not defined
-	# ld.lld: error: version script assignment of 'LIBCTF_1.0' to symbol 'ctf_label_get' failed: symbol not defined
-	# These flags restore it to a warning.
-	# https://reviews.llvm.org/D135402
-	export LDFLAGS="$LDFLAGS -Wl,--undefined-version"
+  export CPPFLAGS="$CPPFLAGS -Wno-c++11-narrowing"
+  # llvm upgraded a warning to an error, which caused this build (and some
+  # others, including the rust toolchain) to fail like so:
+  #
+  # ld.lld: error: version script assignment of 'LIBCTF_1.0' to symbol 'ctf_label_set' failed: symbol not defined
+  # ld.lld: error: version script assignment of 'LIBCTF_1.0' to symbol 'ctf_label_get' failed: symbol not defined
+  # These flags restore it to a warning.
+  # https://reviews.llvm.org/D135402
+  export LDFLAGS="$LDFLAGS -Wl,--undefined-version"
 
-	if [ "$TERMUX_ARCH_BITS" = 32 ]; then
-		export LIB_PATH="$TERMUX_PREFIX/lib:/system/lib"
-	else
-		export LIB_PATH="$TERMUX_PREFIX/lib:/system/lib64"
-	fi
+  if [ "$TERMUX_ARCH_BITS" = 32 ]; then
+    export LIB_PATH="$TERMUX_PREFIX/lib:/system/lib"
+  else
+    export LIB_PATH="$TERMUX_PREFIX/lib:/system/lib64"
+  fi
 }
 
 termux_step_post_make_install() {
-	local d="$TERMUX_PREFIX"/share/binutils
-	mkdir -p "$d"
-	touch "$d"/.placeholder
+  local d="$TERMUX_PREFIX"/share/binutils
+  mkdir -p "$d"
+  touch "$d"/.placeholder
 
-	mkdir -p "$TERMUX_PREFIX"/bin
-	cd "$TERMUX_PREFIX"/libexec/binutils || exit
+  mkdir -p "$TERMUX_PREFIX"/bin
+  cd "$TERMUX_PREFIX"/libexec/binutils || exit
 
-	mv ld{.bfd,}
-	ln -sf ld{,.bfd}
-	ln -sfr "$TERMUX_PREFIX"/libexec/binutils/ld "$TERMUX_PREFIX"/bin/ld.bfd
+  mv ld{.bfd,}
+  ln -sf ld{,.bfd}
+  ln -sfr "$TERMUX_PREFIX"/libexec/binutils/ld "$TERMUX_PREFIX"/bin/ld.bfd
 
-	rm -f "$TERMUX_PREFIX"/bin/ld.gold
-	mv ld.gold "$TERMUX_PREFIX"/bin/
-	ln -sfr "$TERMUX_PREFIX"/bin/{ld.,}gold
+  rm -f "$TERMUX_PREFIX"/bin/ld.gold
+  mv ld.gold "$TERMUX_PREFIX"/bin/
+  ln -sfr "$TERMUX_PREFIX"/bin/{ld.,}gold
 
-	for b in *; do
-		ln -sfr "$TERMUX_PREFIX"/libexec/binutils/"$b" \
-			"$TERMUX_PREFIX"/bin/"$b"
-	done
+  for b in *; do
+    ln -sfr "$TERMUX_PREFIX"/libexec/binutils/"$b" \
+      "$TERMUX_PREFIX"/bin/"$b"
+  done
 
-	# Setup symlinks as these are used when building, so used by
-	# system setup in e.g. python, perl and libtool:
-	local _TOOLS_WITH_HOST_PREFIX="ar ld nm objdump ranlib readelf strip"
-	for b in "$_TOOLS_WITH_HOST_PREFIX"; do
-		ln -sfr "$TERMUX_PREFIX"/libexec/binutils/"$b" \
-			"$TERMUX_PREFIX"/bin/"$TERMUX_HOST_PLATFORM"-"$b"
-	done
+  # Setup symlinks as these are used when building, so used by
+  # system setup in e.g. python, perl and libtool:
+  local _TOOLS_WITH_HOST_PREFIX="ar ld nm objdump ranlib readelf strip"
+  for b in "$_TOOLS_WITH_HOST_PREFIX"; do
+    ln -sfr "$TERMUX_PREFIX"/libexec/binutils/"$b" \
+      "$TERMUX_PREFIX"/bin/"$TERMUX_HOST_PLATFORM"-"$b"
+  done
 }
 
 termux_step_post_massage() {
-	rm -rf bin
+  rm -rf bin
 }
